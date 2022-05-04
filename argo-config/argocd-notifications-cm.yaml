@@ -21,7 +21,9 @@ data:
               "configurationChange": {},
               "labels": {
                 "version": "{{.app.status.sync.revision}}",
-                "servicename": "{{.app.metadata.name}}"
+                "servicename": "{{.app.metadata.name}}",
+                "owner": "{{(call .repo.GetCommitMetadata .app.status.sync.revision).Author}}",
+                "repository": "{{.app.spec.source.repoURL}}"
               },
               "project": "{{.app.metadata.labels.keptnProject}}",
               "service": "{{.app.metadata.labels.keptnService}}",
@@ -47,6 +49,8 @@ data:
               "project": "{{.app.metadata.labels.keptnProject}}",
               "service": "{{.app.metadata.labels.keptnService}}",
               "stage": "{{.app.metadata.labels.stage}}",
+              "owner": "{{(call .repo.GetCommitMetadata .app.status.sync.revision).Author}}",
+              "repository": "{{.app.spec.source.repoURL}}",
               "result": "pass"
             },
             "source": "argocd",
