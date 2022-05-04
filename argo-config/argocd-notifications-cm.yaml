@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-notifications-cm
+  namespace: argocd
+data:
+  service.webhook.keptn: |
+    url: https://{{ $keptn_api_fqdn }}/api/v1/event
+    headers: #optional headers
+    - name: x-token
+      value: ${keptn-x-token}
+    - name: Content-Type
+      value: application/json
+  template.keptn-outofsync: |
+    webhook:
+      keptn:
+        method: POST
+        body: |
+          {
+            "data": {
+              "configurationChange": {},
+              "labels": {
+                "version": "{{.app.status.sync.revision}}",
+                "servicename": "{{.app.metadata.name}}"
+              },
+              "project": "{{.app.metadata.labels.keptnProject}}",
+              "service": "{{.app.metadata.labels.keptnService}}",
+              "stage": "{{.app.metadata.labels.stage}}"
+            },
+            "source": "argocd",
+            "specversion": "1.0",
+            "type": "sh.keptn.event.dev.artifact-delivery.triggered",
+            "shkeptnspecversion": "0.2.3"
+          }
+  template.keptn-deployed: |
+    webhook:
+      keptn:
+        method: POST
+        body: |
+          {
+            "data": {
+              "configurationChange": {},
+              "labels": {
+                "version": "{{.app.status.sync.revision}}",
+                "servicename": "{{.app.metadata.name}}"
+              },
+              "project": "{{.app.metadata.labels.keptnProject}}",
+              "service": "{{.app.metadata.labels.keptnService}}",
+              "stage": "{{.app.metadata.labels.stage}}",
+              "result": "pass"
+            },
+            "source": "argocd",
+            "specversion": "1.0",
+            "type": "sh.keptn.event.deliver.finished",
+            "shkeptnspecversion": "0.2.3",
+            {{$first := true}}
+            {{- range $index,$value := .app.status.operationState.operation.info}}
+              {{- if $first}}
+                  {{- $first = false}}
+              {{- else}}
+                  ,
+              {{- end}}
+            "{{$value.name}}": "{{$value.value}}"
+            {{- end}}
+          }
+  trigger.on-out-of-sync-status: |
+    - when: app.status.sync.status == 'OutOfSync'
+      send: [keptn-outofsync]
+  trigger.on-deployed: |
+    - when: app.status.sync.status == 'Synced' and app.status.operationState.phase in ['Succeeded'] and app.status.health.status == 'Healthy'
+      send: [keptn-deployed]
