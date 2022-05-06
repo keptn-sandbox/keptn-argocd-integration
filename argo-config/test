@@ -1,0 +1,16 @@
+./base/
+./base/jmeter
+./base/job
+
+./stages/dev/job/config.yaml
+./stages/hardening/helm/values.yaml
+./environment/us-east1/helm/values.yaml
+=> app-version.zip
+
+git:
+./svc-1/base
+./svc-1/stages/dev/job/config.yaml
+./svc-1/stages/hardening/helm/values.yaml
+
+./base/svc-1
+./stages/dev/svc-1/job/config.yaml
