@@ -21,6 +21,32 @@ Currently, the integration is mainly based on notifications on the argo side and
 - samples -> sample configurations for argocd apps
 ```
 
+## Workflow (What / How it Happens)
+1. Argo goes `OutOfSync` and triggers the `keptn-outofsync` notification. This is a `triggered` event for a delivery keptn sequence
+2. Keptn webhook listens for a task event of `deliver.triggered` which sends a webhook to Argo `/sync`. The webhook will automatically generate the `deliver.started` task cloudevent because of this
+3. When the app is synced and healty, Argo runs the `keptn-deployed` notification template which sends the `deliver.finished` task cloudevent to keptn
+4. Keptn then progresses to the next task in the sequence (if there is one) eg. a load test or quality gate check
+
+An minimal example Keptn shipyard file for this might be:
+
+```
+apiVersion: "spec.keptn.sh/0.2.2"
+kind: "Shipyard"
+metadata:
+  name: "argocd-demo-shipyard"
+spec:
+  stages:
+    - name: "dev"
+      sequences:
+        - name: "artifact-delivery"
+          tasks:
+            - name: "deliver"
+            # (optional) your extra tasks here (eg. load tests, security scans, quality gates etc.)
+            #- name: "load"
+            #- name: "foo-task-here"
+            #- name: "evaluation"
+```
+
 ## Contributors
 
 A big thanks to all [maintainers](CODEOWNERS) and [contributors](https://github.com/keptn-sandbox/keptn-argo-integration/graphs/contributors)!
