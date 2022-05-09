@@ -6,7 +6,7 @@ spec:
   webhooks:
     - type: sh.keptn.event.deliver.triggered
       requests:
-        - "curl --header 'Authorization: Bearer {{.env.secret_argokeptn_token}}'
+        - "curl --header 'Authorization: Bearer {{.env.secret_argo_token}}'
           --request POST --data
           '{\"infos\":[{\"name\":\"triggeredid\",\"value\":\"{{.id}}\"},{\"name\
           \":\"shkeptncontext\",\"value\":\"{{.shkeptncontext}}\"}],\"prune\":t\
