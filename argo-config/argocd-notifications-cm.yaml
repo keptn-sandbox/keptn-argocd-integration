@@ -5,10 +5,10 @@ metadata:
   namespace: argocd
 data:
   service.webhook.keptn: |
-    url: https://{{ $keptn_api_fqdn }}/api/v1/event
+    url: https://$keptn-api-hostname/api/v1/event
     headers: #optional headers
     - name: x-token
-      value: ${keptn-x-token}
+      value: $keptn-api-token
     - name: Content-Type
       value: application/json
   template.keptn-outofsync: |
@@ -21,9 +21,8 @@ data:
               "configurationChange": {},
               "labels": {
                 "version": "{{.app.status.sync.revision}}",
-                "servicename": "{{.app.metadata.name}}",
-                "owner": "{{(call .repo.GetCommitMetadata .app.status.sync.revision).Author}}",
-                "repository": "{{.app.spec.source.repoURL}}"
+                "appname": "{{.app.metadata.name}}",
+                "argocd": "https://$argo-hostname/applications/{{.app.metadata.name}}"
               },
               "project": "{{.app.metadata.labels.keptnProject}}",
               "service": "{{.app.metadata.labels.keptnService}}",
@@ -31,7 +30,7 @@ data:
             },
             "source": "argocd",
             "specversion": "1.0",
-            "type": "sh.keptn.event.dev.artifact-delivery.triggered",
+            "type": "sh.keptn.event.dev.kickoff.triggered",
             "shkeptnspecversion": "0.2.3"
           }
   template.keptn-deployed: |
@@ -44,12 +43,19 @@ data:
               "configurationChange": {},
               "labels": {
                 "version": "{{.app.status.sync.revision}}",
-                "servicename": "{{.app.metadata.name}}"
+                "appname": "{{.app.metadata.name}}",
+                "link": "{{.app.metadata.annotations.externalURI}}",
+                "buildId": "{{.app.status.sync.revision}}",
+                "argocd": "https://$argo-hostname/applications/{{.app.metadata.name}}"
+              },
+              "deployment": {
+                  "deploymentURIsPublic": [
+                     "{{.app.metadata.annotations.externalURI}}"
+               ]
               },
               "project": "{{.app.metadata.labels.keptnProject}}",
               "service": "{{.app.metadata.labels.keptnService}}",
               "stage": "{{.app.metadata.labels.stage}}",
-              "owner": "{{(call .repo.GetCommitMetadata .app.status.sync.revision).Author}}",
               "repository": "{{.app.spec.source.repoURL}}",
               "result": "pass"
             },
