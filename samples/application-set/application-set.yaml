@@ -1,0 +1,42 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: podtato-kustomize
+  namespace: ci-cd
+spec:
+  generators:
+  - matrix:
+      generators:
+      - git:
+          repoURL: https://github.com/ortelius/ortelius-kubernetes.git
+          revision: HEAD
+          directories:
+          - path: kube-infra/kustomize/podtato-head/*
+        exclude: 
+      - list:
+          elements:
+          - cluster: production
+            url: https://aks-1d6d379d.hcp.centralus.azmk8s.io:443
+            values:
+              CLIENT_ENVIRONMENT: production              
+  template:
+    metadata:
+      name: 'podtato-kustomize'
+      annotations:
+        notifications.argoproj.io/subscribe.on-deployed.keptn: ""
+        notifications.argoproj.io/subscribe.on-out-of-sync-status.keptn: ""
+        environment: prod
+    spec:
+      project: ortelius
+      source:
+        repoURL: https://github.com/ortelius/ortelius-kubernetes.git
+        targetRevision: HEAD
+        path: '{{path}}/overlays/{{cluster}}'
+      destination:
+        server: '{{url}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:  
+        - CreateNamespace=true
