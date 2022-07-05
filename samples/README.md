@@ -1,3 +1,3 @@
 # ArgoCD Integration samples
 
-* "<create a folder and point to your example here>"
+* [Argo Application Set Sample](./application-set)
